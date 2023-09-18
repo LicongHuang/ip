@@ -1,4 +1,4 @@
-package cheese.Ui;
+package cheese.ui;
 
 import java.util.Scanner;
 

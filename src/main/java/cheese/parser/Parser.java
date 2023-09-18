@@ -1,4 +1,4 @@
-package cheese.Parser;
+package cheese.parser;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -8,8 +8,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-import cheese.Task.Task;
-
+import cheese.task.Task;
+import cheese.client.Client;
+import cheese.policy.Policy;
 /**
  * Parser class to parse user input
  */
@@ -157,6 +158,8 @@ public class Parser {
       case "deadline":
       case "event":
       case "delete":
+      case "addclient":
+      case "deleteclient":
       return true;
       default:
       return false;
@@ -221,5 +224,51 @@ public class Parser {
       System.out.println(e.getMessage());
     }
     return newTask;
+  }
+
+  /**
+     * Parses user input and returns Client
+     * @param input User input
+     * @return Client
+     */
+  public Client parseClient(String input) {
+    String[] inputSplit = input.split(" ");
+    String command = inputSplit[0];
+    Client newClient = null;
+    try {
+      if (inputSplit.length < 2 && isCommand(input)) {
+        throw new IllegalArgumentException("☹ OOPS!!! The description of a " + command + " cannot be empty.");
+      } else if (inputSplit.length < 2 && !isCommand(input)) {
+        throw new IllegalArgumentException("☹ OOPS!!! I'm sorry, but I don't know what that means :-(");
+      }
+
+      String name = inputSplit[1];
+      String address = inputSplit[2];
+      String phone = inputSplit[3];
+      String email = inputSplit[4];
+      LocalDate birthDate = convertDateTime(inputSplit[5]);
+
+      switch (command) {
+        case "addclient":
+        newClient = new Client(name, address, phone, email, birthDate);
+        break;
+
+        default:
+        throw new IllegalArgumentException("☹ OOPS!!! I'm sorry, but I don't know what that means :-(");
+      }
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+    }
+    return newClient;
+  }
+
+  public Policy parsePolicy(String input){
+    String[] inputSplit = input.split(";");
+    String name = inputSplit[0];
+    float policyPrice = Float.valueOf(inputSplit[1]);
+    float policyCoverage = Float.valueOf(inputSplit[2]);
+
+    Policy newPolicy = new Policy(name, policyPrice, policyCoverage);
+    return newPolicy;
   }
 }

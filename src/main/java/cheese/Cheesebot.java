@@ -1,11 +1,14 @@
 package cheese;
 
-import cheese.Ui.Ui;
-import cheese.TaskList.TaskList;
-import cheese.Storage.Storage;
-import cheese.Parser.Parser;
-import cheese.Task.Task;
+import cheese.ui.Ui;
+import cheese.tasklist.TaskList;
+import cheese.storage.Storage;
+import cheese.parser.Parser;
+import cheese.task.Task;
 import cheese.dialogbox.DialogBox;
+import cheese.client.Client;
+import cheese.clientlist.ClientList;
+import cheese.storage.ClientStorage;
 
 import java.util.Scanner;
 
@@ -39,6 +42,8 @@ public class Cheesebot  extends Application{
   private Storage storage;
   /** The parser of the Cheesebot. */
   private Parser parser = new Parser();
+  private ClientList clientList = new ClientList();
+  private ClientStorage clientStorage;
 
   // JavaFX
   private ScrollPane scrollPane;
@@ -46,6 +51,7 @@ public class Cheesebot  extends Application{
   private TextField userInput;
   private Button sendButton;
   private Scene scene;
+  
 
   private Image userImage = new Image(this.getClass().getResourceAsStream("/images/DaUser.png"));
   private Image cheesebotImage = new Image(this.getClass().getResourceAsStream("/images/DaDuke.png"));
@@ -57,6 +63,8 @@ public class Cheesebot  extends Application{
     this.taskList = new TaskList();
     this.ui = new Ui();
     this.storage = new Storage("./cheese.txt");
+    this.clientList = new ClientList();
+    this.clientStorage = new ClientStorage("./client.txt");
   }
 
   /**
@@ -65,6 +73,7 @@ public class Cheesebot  extends Application{
   public void run() {
     ui.showWelcome();
     taskList = storage.loadTask();
+    clientList = clientStorage.loadClient();
     Scanner scanner = new Scanner(System.in);
     String userInput;
 
@@ -74,6 +83,7 @@ public class Cheesebot  extends Application{
     } while (!userInput.equals("bye"));
 
     storage.saveTask(taskList.getCheeseList());
+    clientStorage.saveClient(clientList);
     ui.showBye();
     scanner.close();
   }
@@ -140,6 +150,16 @@ public class Cheesebot  extends Application{
           ui.showMessage("No matching tasks found!");
         }
         break;
+        case "addclient":
+        Client newClient = parser.parseClient(input);
+        if (newClient != null) {
+          clientList.addClient(newClient);
+          ui.showMessage("Got it. I've added this client:\n  " + clientList.getClient(clientList.getSize() - 1)
+            + "\nNow you have " + clientList.getSize() + " clients in the list.");
+        } else {
+          ui.showMessage("☹ OOPS!!! Client formatting is weird.");
+        }
+
         default:
         ui.showMessage("I'm sorry, but I don't know what that means :-(");
       }
@@ -321,6 +341,8 @@ public class Cheesebot  extends Application{
           response.append("No matching tasks found!\n");
         }
         break;
+        case "addclient":
+        
         default:
         response.append("I'm sorry, but I don't know what that means :-(");
       }
